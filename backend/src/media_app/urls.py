@@ -1,60 +1,3 @@
-# from django.urls import path
-
-# from .views import (
-#     MediaListView,
-#     TrashListView,
-#     MediaUploadView,
-#     MediaDeleteView,
-#     MediaRestoreView,
-#     MediaPermanentDeleteView,
-# )
-
-
-# urlpatterns = [
-
-#     # Library
-#     path(
-#         "",
-#         MediaListView.as_view(),
-#         name="media-list",
-#     ),
-
-#     # Upload
-#     path(
-#         "upload/",
-#         MediaUploadView.as_view(),
-#         name="media-upload",
-#     ),
-
-#     # Trash
-#     path(
-#         "trash/",
-#         TrashListView.as_view(),
-#         name="media-trash",
-#     ),
-
-#     # Move to Trash
-#     path(
-#         "<uuid:pk>/",
-#         MediaDeleteView.as_view(),
-#         name="media-delete",
-#     ),
-
-#     # Restore
-#     path(
-#         "<uuid:pk>/restore/",
-#         MediaRestoreView.as_view(),
-#         name="media-restore",
-#     ),
-
-#     # Permanent Delete
-#     path(
-#         "<uuid:pk>/permanent/",
-#         MediaPermanentDeleteView.as_view(),
-#         name="media-permanent-delete",
-#     ),
-# ]
-
 from django.urls import path
 
 from .views import (
@@ -66,10 +9,18 @@ from .views import (
     MediaDeleteView,
     MediaRestoreView,
     MediaPermanentDeleteView,
+    AlbumListView,
+    AlbumDetailView,
+    AlbumAddMediaView,
+    AlbumRemoveMediaView,
 )
 
 
 urlpatterns = [
+
+    # =========================
+    # Media Library
+    # =========================
 
     # Active Library
     path(
@@ -78,14 +29,12 @@ urlpatterns = [
         name="media-list",
     ),
 
-
-    # Upload
+    # Upload Media
     path(
         "upload/",
         MediaUploadView.as_view(),
         name="media-upload",
     ),
-
 
     # Favorites
     path(
@@ -93,7 +42,6 @@ urlpatterns = [
         FavoriteListView.as_view(),
         name="media-favorites",
     ),
-
 
     # Toggle Favorite
     path(
@@ -103,13 +51,49 @@ urlpatterns = [
     ),
 
 
-    # Trash List
+    # =========================
+    # Albums
+    # =========================
+
+    # List albums / Create album
+    path(
+        "albums/",
+        AlbumListView.as_view(),
+        name="album-list",
+    ),
+
+    # Album details / Update / Delete
+    path(
+        "albums/<uuid:pk>/",
+        AlbumDetailView.as_view(),
+        name="album-detail",
+    ),
+
+    # Add media to album
+    path(
+        "albums/<uuid:pk>/add-media/",
+        AlbumAddMediaView.as_view(),
+        name="album-add-media",
+    ),
+
+    # Remove media from album
+    path(
+        "albums/<uuid:pk>/remove-media/<uuid:media_id>/",
+        AlbumRemoveMediaView.as_view(),
+        name="album-remove-media",
+    ),
+
+
+    # =========================
+    # Trash Management
+    # =========================
+
+    # Trash list
     path(
         "trash/",
         TrashListView.as_view(),
         name="media-trash",
     ),
-
 
     # Move to Trash
     path(
@@ -118,7 +102,6 @@ urlpatterns = [
         name="media-trash-move",
     ),
 
-
     # Restore from Trash
     path(
         "<uuid:pk>/restore/",
@@ -126,8 +109,7 @@ urlpatterns = [
         name="media-restore",
     ),
 
-
-    # Permanent Delete
+    # Permanently Delete
     path(
         "<uuid:pk>/permanent/",
         MediaPermanentDeleteView.as_view(),

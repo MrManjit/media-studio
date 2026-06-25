@@ -61,31 +61,18 @@ class Media(models.Model):
         blank=True,
     )
 
-
-    # =========================
-    # Media Management Features
-    # =========================
-
     is_favorite = models.BooleanField(
         default=False,
-        help_text="Marked as favorite by user",
     )
 
     is_deleted = models.BooleanField(
         default=False,
-        help_text="Moved to trash",
     )
 
     deleted_at = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="When media was moved to trash",
     )
-
-
-    # =========================
-    # Timestamps
-    # =========================
 
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -95,6 +82,50 @@ class Media(models.Model):
         auto_now=True,
     )
 
-
     def __str__(self):
         return self.original_filename
+
+
+class Album(models.Model):
+    """
+    Collection of media files
+    """
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    name = models.CharField(
+        max_length=200,
+    )
+
+    description = models.TextField(
+        blank=True,
+    )
+
+    media = models.ManyToManyField(
+        Media,
+        related_name="albums",
+        blank=True,
+    )
+
+    cover_image = models.ForeignKey(
+        Media,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="album_cover_for",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    def __str__(self):
+        return self.name
