@@ -289,9 +289,53 @@ class AlbumDetailView(APIView):
         )
 
 
-class AlbumAddMediaView(APIView):
+# class AlbumAddMediaView(APIView):
+#     """
+#     Add media file to album
+#     """
+
+#     def post(self, request, pk):
+
+#         album = get_object_or_404(
+#             Album,
+#             pk=pk,
+#         )
+
+#         media_id = request.data.get(
+#             "media_id"
+#         )
+
+#         media = get_object_or_404(
+#             Media,
+#             pk=media_id,
+#             is_deleted=False,
+#         )
+
+#         if album.media.filter(
+#             pk=media.pk
+#         ).exists():
+
+#             return Response(
+#                 {
+#                     "message":
+#                     "Media already exists in album"
+#                 },
+#                 status=status.HTTP_200_OK,
+#             )
+
+#         album.media.add(media)
+
+#         return Response(
+#             {
+#                 "message":
+#                 "Media added to album"
+#             },
+#             status=status.HTTP_200_OK,
+#         )
+
+class AlbumBulkAddMediaView(APIView):
     """
-    Add media file to album
+    Add multiple media items to an album
     """
 
     def post(self, request, pk):
@@ -301,38 +345,41 @@ class AlbumAddMediaView(APIView):
             pk=pk,
         )
 
-        media_id = request.data.get(
-            "media_id"
+        media_ids = request.data.get(
+            "media_ids",
+            []
         )
 
-        media = get_object_or_404(
-            Media,
-            pk=media_id,
-            is_deleted=False,
-        )
-
-        if album.media.filter(
-            pk=media.pk
-        ).exists():
+        if not media_ids:
 
             return Response(
                 {
-                    "message":
-                    "Media already exists in album"
+                    "message": "No media selected."
                 },
-                status=status.HTTP_200_OK,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        album.media.add(media)
+        added = 0
+
+        for media in Media.objects.filter(
+            id__in=media_ids,
+            is_deleted=False,
+        ):
+
+            if not album.media.filter(
+                pk=media.pk
+            ).exists():
+
+                album.media.add(media)
+                added += 1
 
         return Response(
             {
-                "message":
-                "Media added to album"
+                "message": f"{added} media added.",
+                "added": added,
             },
             status=status.HTTP_200_OK,
         )
-
 
 class AlbumRemoveMediaView(APIView):
     """
