@@ -11,7 +11,7 @@ from .views import (
     MediaPermanentDeleteView,
     AlbumListView,
     AlbumDetailView,
-    AlbumAddMediaView,
+    AlbumBulkAddMediaView,
     AlbumRemoveMediaView,
 )
 
@@ -69,11 +69,17 @@ urlpatterns = [
         name="album-detail",
     ),
 
-    # Add media to album
+    # # Add media to album
+    # path(
+    #     "albums/<uuid:pk>/add-media/",
+    #     AlbumAddMediaView.as_view(),
+    #     name="album-add-media",
+    # ),
+    # Add multiple media to album
     path(
-        "albums/<uuid:pk>/add-media/",
-        AlbumAddMediaView.as_view(),
-        name="album-add-media",
+        "albums/<uuid:pk>/bulk-add/",
+        AlbumBulkAddMediaView.as_view(),
+        name="album-bulk-add",
     ),
 
     # Remove media from album

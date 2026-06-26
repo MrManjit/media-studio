@@ -1,994 +1,348 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-
-// type Media = {
-//   id: string;
-//   original_filename: string;
-//   media_type: string;
-//   mime_type: string;
-//   file_size: number;
-//   file_url: string;
-//   created_at: string;
-// };
-
-// export default function LibraryPage() {
-//   const [mediaList, setMediaList] = useState<Media[]>([]);
-//   const [loading, setLoading] = useState(true);
-
-//   const [search, setSearch] = useState("");
-//   const [filter, setFilter] = useState("all");
-//   const [sortBy, setSortBy] = useState("newest");
-
-//   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
-
-
-//   useEffect(() => {
-//     fetchMedia();
-//   }, []);
-
-
-//   const fetchMedia = async () => {
-//     try {
-//       const response = await fetch(
-//         "http://localhost:8000/api/media/"
-//       );
-
-//       const data = await response.json();
-
-//       setMediaList(data);
-
-//     } catch (error) {
-//       console.error(error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-
-//   const deleteMedia = async (id: string) => {
-
-//     const confirmDelete = window.confirm(
-//       "Delete this media permanently?"
-//     );
-
-//     if (!confirmDelete) return;
-
-
-//     try {
-
-//       const response = await fetch(
-//         `http://localhost:8000/api/media/${id}/`,
-//         {
-//           method: "DELETE",
-//         }
-//       );
-
-
-//       if (response.ok) {
-
-//         setMediaList(
-//           mediaList.filter(
-//             (item) => item.id !== id
-//           )
-//         );
-
-//         if (selectedMedia?.id === id) {
-//           setSelectedMedia(null);
-//         }
-
-//       } else {
-
-//         alert("Unable to delete file");
-
-//       }
-
-//     } catch (error) {
-
-//       console.error(error);
-//       alert("Server error");
-
-//     }
-//   };
-
-
-//   const processedMedia = [...mediaList]
-
-//     .filter((item) => {
-
-//       const matchesSearch =
-//         item.original_filename
-//           .toLowerCase()
-//           .includes(search.toLowerCase());
-
-
-//       const matchesFilter =
-//         filter === "all" ||
-//         item.media_type === filter;
-
-
-//       return matchesSearch && matchesFilter;
-
-//     })
-
-
-//     .sort((a, b) => {
-
-//       switch (sortBy) {
-
-//         case "oldest":
-//           return (
-//             new Date(a.created_at).getTime()
-//             -
-//             new Date(b.created_at).getTime()
-//           );
-
-
-//         case "name":
-//           return a.original_filename.localeCompare(
-//             b.original_filename
-//           );
-
-
-//         case "smallest":
-//           return a.file_size - b.file_size;
-
-
-//         case "largest":
-//           return b.file_size - a.file_size;
-
-
-//         default:
-//           return (
-//             new Date(b.created_at).getTime()
-//             -
-//             new Date(a.created_at).getTime()
-//           );
-
-//       }
-
-//     });
-
-
-//   if (loading) {
-//     return (
-//       <main className="p-10">
-//         Loading Media...
-//       </main>
-//     );
-//   }
-
-
-//   return (
-//     <main className="min-h-screen p-8">
-
-
-//       <h1 className="text-4xl font-bold">
-//         Media Studio Library
-//       </h1>
-
-
-//       <p className="mt-2 text-gray-500">
-//         {processedMedia.length} items
-//       </p>
-
-
-//       <input
-//         type="text"
-//         placeholder="Search media..."
-//         value={search}
-//         onChange={(e) => setSearch(e.target.value)}
-//         className="
-//           mt-6
-//           border
-//           p-3
-//           rounded
-//           w-full
-//           max-w-md
-//         "
-//       />
-
-
-//       <div className="flex gap-3 mt-4 flex-wrap">
-
-
-//         <button onClick={() => setFilter("all")}
-//           className="border px-4 py-2 rounded">
-//           All
-//         </button>
-
-
-//         <button onClick={() => setFilter("image")}
-//           className="border px-4 py-2 rounded">
-//           🖼 Images
-//         </button>
-
-
-//         <button onClick={() => setFilter("video")}
-//           className="border px-4 py-2 rounded">
-//           🎥 Videos
-//         </button>
-
-
-//         <select
-//           value={sortBy}
-//           onChange={(e) => setSortBy(e.target.value)}
-//           className="border p-2 rounded"
-//         >
-//           <option value="newest">
-//             Newest
-//           </option>
-
-//           <option value="oldest">
-//             Oldest
-//           </option>
-
-//           <option value="name">
-//             Name A-Z
-//           </option>
-
-//           <option value="smallest">
-//             Size ↑
-//           </option>
-
-//           <option value="largest">
-//             Size ↓
-//           </option>
-
-//         </select>
-
-//       </div>
-
-
-
-//       <div className="
-//         grid
-//         grid-cols-1
-//         md:grid-cols-3
-//         lg:grid-cols-4
-//         gap-6
-//         mt-8">
-
-//         {
-//           processedMedia.map((item) => (
-
-//             <div
-//               key={item.id}
-//               className="
-//                 border
-//                 rounded-lg
-//                 overflow-hidden
-//                 shadow
-//                 hover:shadow-xl
-//                 transition
-//               ">
-
-//               <div
-//                 className="cursor-pointer"
-//                 onClick={() => setSelectedMedia(item)}
-//               >
-
-//                 {
-//                   item.media_type === "image" ? (
-
-//                     <img
-//                       src={item.file_url}
-//                       alt={item.original_filename}
-//                       className="
-//                         w-full
-//                         h-56
-//                         object-cover
-//                       "
-//                     />
-
-//                   ) : (
-
-//                     <div className="
-//                       h-56
-//                       flex
-//                       items-center
-//                       justify-center
-//                       text-6xl">
-//                       🎥
-//                     </div>
-
-//                   )
-//                 }
-
-//               </div>
-
-
-//               <div className="p-4">
-
-//                 <h2 className="font-bold truncate">
-//                   {item.original_filename}
-//                 </h2>
-
-
-//                 <p>
-//                   {(item.file_size / 1024).toFixed(2)} KB
-//                 </p>
-
-
-//                 <div className="flex gap-4 mt-3">
-
-//                   <a
-//                     href={item.file_url}
-//                     download
-//                     className="text-green-600 underline"
-//                   >
-//                     Download
-//                   </a>
-
-
-//                   <button
-//                     onClick={() => deleteMedia(item.id)}
-//                     className="text-red-600 underline"
-//                   >
-//                     Delete
-//                   </button>
-
-
-//                 </div>
-
-//               </div>
-
-//             </div>
-
-//           ))
-//         }
-
-//       </div>
-
-
-
-//       {
-//         selectedMedia && (
-
-//           <div className="
-//             fixed inset-0
-//             bg-black/90
-//             flex
-//             items-center
-//             justify-center
-//             z-50
-//           ">
-
-//             <div className="max-w-5xl p-4">
-
-
-//               <button
-//                 onClick={() => setSelectedMedia(null)}
-//                 className="
-//                   text-white
-//                   text-xl
-//                   mb-4
-//                 ">
-//                 ✕ Close
-//               </button>
-
-
-//               {
-//                 selectedMedia.media_type === "image"
-//                 ? (
-
-//                   <img
-//                     src={selectedMedia.file_url}
-//                     alt=""
-//                     className="
-//                       max-h-[80vh]
-//                       rounded
-//                     "
-//                   />
-
-//                 ) : (
-
-//                   <video
-//                     controls
-//                     className="
-//                       max-h-[80vh]
-//                     "
-//                   >
-
-//                     <source
-//                       src={selectedMedia.file_url}
-//                     />
-
-//                   </video>
-
-//                 )
-//               }
-
-
-//               <div className="
-//                 text-white
-//                 mt-4
-//               ">
-
-//                 <h2 className="text-xl font-bold">
-//                   {selectedMedia.original_filename}
-//                 </h2>
-
-//                 <p>
-//                   {(selectedMedia.file_size / 1024).toFixed(2)}
-//                   KB
-//                 </p>
-
-//               </div>
-
-//             </div>
-
-//           </div>
-
-//         )
-//       }
-
-
-//     </main>
-//   );
-
-// }
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import type { Media } from "../../types/media";
+import MediaCard from "../../components/media/MediaCard";
+import SelectionToolbar from "../../components/media/SelectionToolbar";
+import AlbumSelectorModal from "../../components/media/AlbumSelectorModal";
 
-type Media = {
-  id: string;
-  original_filename: string;
-  media_type: string;
-  file_size: number;
-  file_url: string;
-  created_at: string;
-  is_favorite: boolean;
-};
+import {
+  getMedia,
+  toggleFavorite as apiToggleFavorite,
+  moveToTrash as apiMoveToTrash,
+} from "../../services/media";
 
+const FILTER_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "image", label: "Images" },
+  { value: "video", label: "Videos" },
+] as const;
+
+const SORT_OPTIONS = [
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
+  { value: "name", label: "Name A-Z" },
+  { value: "small", label: "Smallest" },
+  { value: "large", label: "Largest" },
+] as const;
+
+type FilterValue = (typeof FILTER_OPTIONS)[number]["value"];
+type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 export default function LibraryPage() {
-
-
   const [media, setMedia] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [sort, setSort] = useState("newest");
+  const [filter, setFilter] = useState<FilterValue>("all");
+  const [sort, setSort] = useState<SortValue>("newest");
 
-  const [selected, setSelected] =
-    useState<Media | null>(null);
-
-
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [previewMedia, setPreviewMedia] = useState<Media | null>(null);
+  const [albumModalOpen, setAlbumModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchMedia();
+    loadMedia();
   }, []);
 
-
-
-  async function fetchMedia() {
-
+  async function loadMedia() {
     try {
-
-      const response = await fetch(
-        "http://localhost:8000/api/media/"
-      );
-
-      const data = await response.json();
-
+      const data = await getMedia();
       setMedia(data);
-
-    } catch(error) {
-
+    } catch (error) {
       console.error(error);
-
     } finally {
-
       setLoading(false);
-
     }
-
   }
 
-
-
-  async function toggleFavorite(id: string) {
-
-
-    try {
-
-      const response = await fetch(
-        `http://localhost:8000/api/media/${id}/favorite/`,
-        {
-          method: "POST",
+  const filteredMedia = useMemo(() => {
+    return media
+      .filter((item) => {
+        const matchesSearch = item.original_filename
+          .toLowerCase()
+          .includes(search.toLowerCase());
+        const matchesFilter = filter === "all" || item.media_type === filter;
+        return matchesSearch && matchesFilter;
+      })
+      .slice()
+      .sort((a, b) => {
+        switch (sort) {
+          case "oldest":
+            return (
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime()
+            );
+          case "name":
+            return a.original_filename.localeCompare(b.original_filename);
+          case "small":
+            return a.file_size - b.file_size;
+          case "large":
+            return b.file_size - a.file_size;
+          default:
+            return (
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+            );
         }
-      );
+      });
+  }, [media, filter, search, sort]);
 
+  const selectedCount = selectedIds.length;
+  const allFilteredSelected =
+    filteredMedia.length > 0 &&
+    filteredMedia.every((item) => selectedIds.includes(item.id));
 
-      if(response.ok) {
-
-
-        const result = await response.json();
-
-
-        setMedia(
-          media.map(item => {
-
-            if(item.id === id) {
-
-              return {
-                ...item,
-                is_favorite: result.is_favorite,
-              };
-
-            }
-
-            return item;
-
-          })
-        );
-
-
-      } else {
-
-        alert("Failed to update favorite");
-
-      }
-
-
-    } catch(error) {
-
-      console.error(error);
-
-    }
-
-  }
-
-  async function moveToTrash(id: string) {
-
-
-    const confirmDelete = window.confirm(
-      "Move this file to Trash?"
+  const toggleSelection = (id: string) => {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((mediaId) => mediaId !== id)
+        : [...current, id]
     );
+  };
 
-
-    if(!confirmDelete) {
+  const handleSelectAll = () => {
+    if (allFilteredSelected) {
+      setSelectedIds([]);
       return;
     }
 
+    setSelectedIds(filteredMedia.map((item) => item.id));
+  };
 
-    const response = await fetch(
-      `http://localhost:8000/api/media/${id}/`,
-      {
-        method: "DELETE",
-      }
-    );
-
-
-    if(response.ok) {
-
-
-      setMedia(
-        media.filter(
-          item => item.id !== id
+  const handleToggleFavorite = async (id: string) => {
+    try {
+      setActionLoading(true);
+      const result = await apiToggleFavorite(id);
+      setMedia((current) =>
+        current.map((item) =>
+          item.id === id
+            ? { ...item, is_favorite: result.is_favorite }
+            : item
         )
       );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update favorite.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-
-      if(selected?.id === id) {
-
-        setSelected(null);
-
-      }
-
-
-    } else {
-
-      alert("Failed to move to trash");
-
+  const handleMoveToTrash = async (id: string) => {
+    const confirmDelete = window.confirm("Move this media to Trash?");
+    if (!confirmDelete) {
+      return;
     }
 
-
-  }
-
-
-
-
-  const filteredMedia = [...media]
-
-
-    .filter(item => {
-
-
-      const matchSearch =
-        item.original_filename
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-
-      const matchFilter =
-        filter === "all"
-        ||
-        item.media_type === filter;
-
-
-      return (
-        matchSearch &&
-        matchFilter
-      );
-
-
-    })
-
-
-    .sort((a, b) => {
-
-
-      switch(sort) {
-
-
-        case "oldest":
-
-          return (
-            new Date(a.created_at).getTime()
-            -
-            new Date(b.created_at).getTime()
-          );
-
-
-        case "name":
-
-          return a.original_filename.localeCompare(
-            b.original_filename
-          );
-
-
-        case "small":
-
-          return (
-            a.file_size - b.file_size
-          );
-
-
-        case "large":
-
-          return (
-            b.file_size - a.file_size
-          );
-
-
-        default:
-
-          return (
-            new Date(b.created_at).getTime()
-            -
-            new Date(a.created_at).getTime()
-          );
-
+    try {
+      setActionLoading(true);
+      await apiMoveToTrash(id);
+      setMedia((current) => current.filter((item) => item.id !== id));
+      setSelectedIds((current) => current.filter((mediaId) => mediaId !== id));
+      if (previewMedia?.id === id) {
+        setPreviewMedia(null);
       }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to move media to trash.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
+  const handlePreview = (mediaItem: Media) => {
+    setPreviewMedia(mediaItem);
+  };
 
-    });
+  const handleAddToAlbum = () => {
+    if (selectedCount === 0) {
+      return;
+    }
+    setAlbumModalOpen(true);
+  };
 
+  const handleCancelSelection = () => {
+    setSelectedIds([]);
+  };
 
+  const handleBulkFavorite = async () => {
+    if (selectedCount === 0) {
+      return;
+    }
 
-  if(loading) {
+    try {
+      setActionLoading(true);
+      const results = await Promise.all(
+        selectedIds.map(async (id) => {
+          const result = await apiToggleFavorite(id);
+          return { id, is_favorite: result.is_favorite };
+        })
+      );
+      const favoriteMap = new Map(results.map((item) => [item.id, item.is_favorite]));
+      setMedia((current) =>
+        current.map((item) =>
+          favoriteMap.has(item.id)
+            ? { ...item, is_favorite: favoriteMap.get(item.id) ?? item.is_favorite }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to favorite selected media.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-    return (
-      <main className="p-8">
-        Loading media...
-      </main>
-    );
+  const handleBulkTrash = async () => {
+    if (selectedCount === 0) {
+      return;
+    }
 
+    const confirmDelete = window.confirm("Move selected media to Trash?");
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      await Promise.all(selectedIds.map(async (id) => apiMoveToTrash(id)));
+      setMedia((current) => current.filter((item) => !selectedIds.includes(item.id)));
+      setSelectedIds([]);
+      setPreviewMedia(null);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to trash selected media.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleAlbumSuccess = () => {
+    setAlbumModalOpen(false);
+    setSelectedIds([]);
+  };
+
+  if (loading) {
+    return <main className="p-8">Loading media...</main>;
   }
-
 
   return (
-
     <main className="p-8">
+      <h1 className="text-4xl font-bold">📁 Media Library</h1>
+      <p className="text-gray-500 mt-2">{filteredMedia.length} items</p>
 
+      <SelectionToolbar
+        count={selectedCount}
+        onAddToAlbum={handleAddToAlbum}
+        onFavorite={handleBulkFavorite}
+        onTrash={handleBulkTrash}
+        onCancel={handleCancelSelection}
+      />
 
-      <h1 className="text-4xl font-bold">
-        📁 Media Library
-      </h1>
-
-
-      <p className="text-gray-500 mt-2">
-        {filteredMedia.length} items
-      </p>
-
-
-      <div className="mt-6 flex flex-wrap gap-3">
-
-
-        <input
-          type="text"
-          placeholder="Search media..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          className="border p-2 rounded"
-        />
-
-
-        <select
-          value={filter}
-          onChange={(e) =>
-            setFilter(e.target.value)
-          }
-          className="border p-2 rounded"
-        >
-          <option value="all">
-            All
-          </option>
-
-          <option value="image">
-            Images
-          </option>
-
-          <option value="video">
-            Videos
-          </option>
-
-        </select>        
-        <select
-          value={sort}
-          onChange={(e) =>
-            setSort(e.target.value)
-          }
-          className="border p-2 rounded"
-        >
-
-          <option value="newest">
-            Newest
-          </option>
-
-          <option value="oldest">
-            Oldest
-          </option>
-
-          <option value="name">
-            Name A-Z
-          </option>
-
-          <option value="small">
-            Smallest
-          </option>
-
-          <option value="large">
-            Largest
-          </option>
-
-        </select>
-
-
-      </div>
-
-
-      <div
-        className="
-          grid
-          grid-cols-1
-          md:grid-cols-3
-          lg:grid-cols-4
-          gap-6
-          mt-8
-        "
-      >
-
-        {
-          filteredMedia.map(item => (
-
-            <div
-              key={item.id}
-              className="
-                border
-                rounded-lg
-                overflow-hidden
-                shadow
-              "
-            >
-
-              <div
-                className="cursor-pointer"
-                onClick={() =>
-                  setSelected(item)
-                }
-              >
-
-                {
-                  item.media_type === "image"
-
-                  ? (
-                    <img
-                      src={item.file_url}
-                      alt={item.original_filename}
-                      className="
-                        w-full
-                        h-56
-                        object-cover
-                      "
-                    />
-                  )
-
-                  : (
-                    <div
-                      className="
-                        h-56
-                        flex
-                        items-center
-                        justify-center
-                        text-6xl
-                      "
-                    >
-                      🎥
-                    </div>
-                  )
-                }
-
-              </div>
-
-
-              <div className="p-4">
-
-
-                <h2 className="font-bold truncate">
-                  {item.original_filename}
-                </h2>
-
-
-                <p className="text-sm text-gray-500">
-                  {(item.file_size / 1024).toFixed(2)}
-                  {" "}
-                  KB
-                </p>
-
-
-                <div
-                  className="
-                    flex
-                    gap-4
-                    mt-4
-                  "
-                >
-
-
-                  <button
-                    onClick={() =>
-                      toggleFavorite(item.id)
-                    }
-                    className="
-                      text-red-500
-                    "
-                  >
-                    {
-                      item.is_favorite
-                        ? "❤️"
-                        : "🤍"
-                    }
-                  </button>
-
-
-                  <a
-                    href={item.file_url}
-                    download
-                    className="
-                      text-green-600
-                      underline
-                    "
-                  >
-                    Download
-                  </a>
-
-
-                  <button
-                    onClick={() =>
-                      moveToTrash(item.id)
-                    }
-                    className="
-                      text-red-700
-                      underline
-                    "
-                  >
-                    Trash
-                  </button>
-
-
-                </div>
-
-
-              </div>
-
-
-            </div>
-
-          ))
-        }
-
-
-      </div>
-
-
-      {
-        selected && (
-
-          <div
-            className="
-              fixed
-              inset-0
-              bg-black/90
-              flex
-              items-center
-              justify-center
-              z-50
-            "
+      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap gap-3 items-center">
+          <button
+            type="button"
+            onClick={handleSelectAll}
+            className="border rounded-lg px-4 py-2 bg-slate-100 hover:bg-slate-200"
           >
+            {allFilteredSelected ? "Deselect all" : "Select all"}
+          </button>
 
+          <input
+            type="text"
+            placeholder="Search media..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border rounded-lg px-4 py-2"
+          />
 
-            <div
-              className="max-w-5xl"
-            >
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as FilterValue)}
+            className="border rounded-lg px-4 py-2"
+          >
+            {FILTER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
 
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortValue)}
+            className="border rounded-lg px-4 py-2"
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
+        <div className="text-sm text-gray-600">
+          {selectedCount > 0
+            ? `${selectedCount} selected`
+            : "Select items to act on them."}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+        {filteredMedia.map((item) => (
+          <MediaCard
+            key={item.id}
+            media={item}
+            selected={selectedIds.includes(item.id)}
+            onSelect={toggleSelection}
+            onPreview={handlePreview}
+            onFavorite={() => handleToggleFavorite(item.id)}
+            onTrash={() => handleMoveToTrash(item.id)}
+          />
+        ))}
+      </div>
+
+      {previewMedia && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-xl max-w-5xl w-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="text-lg font-semibold">Preview</div>
               <button
-                className="
-                  text-white
-                  mb-4
-                "
-                onClick={() =>
-                  setSelected(null)
-                }
+                type="button"
+                onClick={() => setPreviewMedia(null)}
+                className="text-xl"
               >
-                ✕ Close
+                ✕
               </button>
-
-
-              {
-                selected.media_type === "image"
-
-                ? (
-
-                  <img
-                    src={selected.file_url}
-                    alt={selected.original_filename}
-                    className="
-                      max-h-[80vh]
-                    "
-                  />
-
-                )
-
-                : (
-
-                  <video
-                    controls
-                    className="
-                      max-h-[80vh]
-                    "
-                  >
-
-                    <source
-                      src={selected.file_url}
-                    />
-
-                  </video>
-
-                )
-              }
-
-
             </div>
-
-
+            <div className="p-4 flex justify-center">
+              {previewMedia.media_type === "image" ? (
+                <img
+                  src={previewMedia.file_url}
+                  alt={previewMedia.original_filename}
+                  className="max-h-[80vh] object-contain"
+                />
+              ) : (
+                <video controls className="max-h-[80vh] w-full">
+                  <source src={previewMedia.file_url} />
+                </video>
+              )}
+            </div>
           </div>
+        </div>
+      )}
 
-        )
-      }
-
-
+      <AlbumSelectorModal
+        open={albumModalOpen}
+        mediaIds={selectedIds}
+        onClose={() => setAlbumModalOpen(false)}
+        onSuccess={handleAlbumSuccess}
+      />
     </main>
-
   );
-
 }
