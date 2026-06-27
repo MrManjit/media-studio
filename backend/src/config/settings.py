@@ -2,8 +2,9 @@ from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BASE_DIR.parent
 MEDIA_URL = "/media/"
-MEDIA_ROOT = Path("/media")
+MEDIA_ROOT = PROJECT_ROOT / "media"
 
 
 # Security
@@ -131,7 +132,7 @@ STATIC_URL = "static/"
 
 MEDIA_URL = "/media/"
 
-MEDIA_ROOT = "/media"
+MEDIA_ROOT = PROJECT_ROOT / "media"
 
 
 # CORS

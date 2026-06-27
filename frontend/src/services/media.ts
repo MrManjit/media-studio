@@ -13,6 +13,16 @@ export async function getMedia(): Promise<Media[]> {
   return response.json();
 }
 
+export async function getMediaById(id: string): Promise<Media> {
+  const response = await fetch(`${API_URL}/media/${id}/`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch media details");
+  }
+
+  return response.json();
+}
+
 export async function toggleFavorite(id: string) {
   const response = await fetch(
     `${API_URL}/media/${id}/favorite/`,
@@ -68,6 +78,23 @@ export async function permanentlyDeleteMedia(id: string) {
 
   if (!response.ok) {
     throw new Error("Failed to permanently delete media");
+  }
+
+  return response.json();
+}
+
+export async function saveMediaEdits(id: string, formData: FormData) {
+  const response = await fetch(
+    `${API_URL}/media/${id}/save/`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Failed to save edited media");
   }
 
   return response.json();

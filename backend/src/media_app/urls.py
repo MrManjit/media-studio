@@ -6,7 +6,8 @@ from .views import (
     TrashListView,
     MediaUploadView,
     MediaFavoriteToggleView,
-    MediaDeleteView,
+    MediaSaveView,
+    MediaDetailView,
     MediaRestoreView,
     MediaPermanentDeleteView,
     AlbumListView,
@@ -101,11 +102,18 @@ urlpatterns = [
         name="media-trash",
     ),
 
+    # Save edited media
+    path(
+        "<uuid:pk>/save/",
+        MediaSaveView.as_view(),
+        name="media-save",
+    ),
+
     # Move to Trash
     path(
         "<uuid:pk>/",
-        MediaDeleteView.as_view(),
-        name="media-trash-move",
+        MediaDetailView.as_view(),
+        name="media-detail",
     ),
 
     # Restore from Trash
