@@ -1,6 +1,8 @@
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
+from django.core.files.uploadedfile import UploadedFile
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -100,13 +102,50 @@ class MediaFavoriteToggleView(APIView):
         )
 
 
-class MediaDeleteView(APIView):
+class MediaSaveView(APIView):
     """
-    Move media to trash
+    Save edited media by replacing the stored file.
     """
+
+    def post(self, request, pk):
+        media = get_object_or_404(Media, pk=pk)
+        uploaded_file = request.FILES.get("file")
+
+        if not isinstance(uploaded_file, UploadedFile):
+            return Response(
+                {"detail": "No edited file was provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if media.file:
+            media.file.delete(save=False)
+
+        media.file = uploaded_file
+        media.original_filename = uploaded_file.name.rsplit("/", 1)[-1]
+        media.mime_type = uploaded_file.content_type or "application/octet-stream"
+        media.file_size = uploaded_file.size
+        media.media_type = (
+            "image"
+            if media.mime_type.startswith("image/")
+            else media.media_type
+        )
+        media.save()
+
+        serializer = MediaSerializer(media, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MediaDetailView(APIView):
+    """
+    Retrieve a single media item or move it to trash.
+    """
+
+    def get(self, request, pk):
+        media = get_object_or_404(Media, pk=pk)
+        serializer = MediaSerializer(media, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, pk):
-
         media = get_object_or_404(
             Media,
             pk=pk,
