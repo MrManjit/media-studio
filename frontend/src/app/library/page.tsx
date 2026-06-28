@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import type { Media } from "../../types/media";
 import MediaCard from "../../components/media/MediaCard";
@@ -31,6 +32,7 @@ type FilterValue = (typeof FILTER_OPTIONS)[number]["value"];
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 export default function LibraryPage() {
+  const router = useRouter();
   const [media, setMedia] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -43,11 +45,7 @@ export default function LibraryPage() {
   const [previewMedia, setPreviewMedia] = useState<Media | null>(null);
   const [albumModalOpen, setAlbumModalOpen] = useState(false);
 
-  useEffect(() => {
-    loadMedia();
-  }, []);
-
-  async function loadMedia() {
+  const loadMedia = useCallback(async () => {
     try {
       const data = await getMedia();
       setMedia(data);
@@ -56,7 +54,11 @@ export default function LibraryPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(() => loadMedia());
+  }, [loadMedia]);
 
   const filteredMedia = useMemo(() => {
     return media
@@ -91,6 +93,13 @@ export default function LibraryPage() {
   }, [media, filter, search, sort]);
 
   const selectedCount = selectedIds.length;
+  const selectedMedia = useMemo(() => {
+    const selectedSet = new Set(selectedIds);
+    return media.filter((item) => selectedSet.has(item.id));
+  }, [media, selectedIds]);
+  const canMakeCollage =
+    selectedMedia.length >= 2 &&
+    selectedMedia.every((item) => item.media_type === "image");
   const allFilteredSelected =
     filteredMedia.length > 0 &&
     filteredMedia.every((item) => selectedIds.includes(item.id));
@@ -162,6 +171,14 @@ export default function LibraryPage() {
       return;
     }
     setAlbumModalOpen(true);
+  };
+
+  const handleMakeCollage = () => {
+    if (!canMakeCollage) {
+      return;
+    }
+
+    router.push(`/collage?ids=${selectedMedia.map((item) => item.id).join(",")}`);
   };
 
   const handleCancelSelection = () => {
@@ -237,7 +254,9 @@ export default function LibraryPage() {
 
       <SelectionToolbar
         count={selectedCount}
+        canMakeCollage={canMakeCollage}
         onAddToAlbum={handleAddToAlbum}
+        onMakeCollage={handleMakeCollage}
         onFavorite={handleBulkFavorite}
         onTrash={handleBulkTrash}
         onCancel={handleCancelSelection}

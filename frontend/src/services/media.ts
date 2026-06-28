@@ -23,6 +23,20 @@ export async function getMediaById(id: string): Promise<Media> {
   return response.json();
 }
 
+export async function uploadMedia(formData: FormData): Promise<Media> {
+  const response = await fetch(`${API_URL}/media/upload/`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Failed to upload media");
+  }
+
+  return response.json();
+}
+
 export async function toggleFavorite(id: string) {
   const response = await fetch(
     `${API_URL}/media/${id}/favorite/`,
